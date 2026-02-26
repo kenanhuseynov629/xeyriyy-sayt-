@@ -14,53 +14,72 @@
         body { background: linear-gradient(135deg, var(--dark-blue), #1d2b64); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-bottom: 50px; }
         
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark-blue); z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        input { padding: 12px; border-radius: 10px; border: 1px solid var(--gold); background: rgba(255,255,255,0.1); color: white; margin-bottom: 10px; width: 250px; text-align: center; }
+        input, textarea { padding: 12px; border-radius: 10px; border: 1px solid var(--gold); background: rgba(255,255,255,0.1); color: white; margin-bottom: 10px; width: 250px; text-align: center; font-family: inherit; }
+        
+        .timer-box { font-size: 1.5rem; color: var(--gold); font-weight: bold; margin: 10px 0; border: 1px solid rgba(212, 175, 55, 0.3); padding: 10px 20px; border-radius: 50px; background: rgba(0,0,0,0.2); }
         
         .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(65px, 1fr)); gap: 10px; width: 95%; max-width: 500px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 20px; }
         
         .day-box { aspect-ratio: 1/1; background: var(--dark-blue); border: 1px solid var(--gold); border-radius: 10px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; font-weight: bold; }
-        .day-box.locked { opacity: 0.3; cursor: not-allowed; background: #111; border-color: #444; }
+        .day-box.locked { opacity: 0.3; cursor: not-allowed; background: #111; }
         .day-box.completed { background: var(--gold); color: var(--dark-blue); box-shadow: 0 0 15px var(--gold); }
         
         .stat-card { background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 15px; border: 1px solid var(--gold); text-align: center; backdrop-filter: blur(5px); margin: 10px; width: 85%; max-width: 450px; }
         
-        #task-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 25px; border-radius: 20px; z-index: 1000; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        .tasbeh-btn { width: 80px; height: 80px; border-radius: 50%; border: 4px solid var(--gold); background: none; color: var(--gold); font-size: 1.5rem; cursor: pointer; margin: 10px; outline: none; -webkit-tap-highlight-color: transparent; }
+        .tasbeh-btn:active { transform: scale(0.9); background: rgba(212, 175, 55, 0.2); }
+
+        #task-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 25px; border-radius: 20px; z-index: 1000; width: 85%; max-width: 350px; text-align: center; }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; }
-        .btn { background: #27ae60; color: white; border: none; padding: 12px; border-radius: 25px; width: 100%; cursor: pointer; font-weight: bold; font-size: 1rem; }
-        .leaderboard-item { display: flex; justify-content: space-between; padding: 5px 10px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
+        .btn { background: #27ae60; color: white; border: none; padding: 12px; border-radius: 25px; width: 100%; cursor: pointer; font-weight: bold; }
+        
+        .dua-item { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; margin-bottom: 5px; text-align: left; border-left: 3px solid var(--gold); font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
-    <h2 class="animate__animated animate__fadeIn">🌙 Ramazan Marafonu</h2>
-    <p>Xoş gəldin, müsəlman yoldaşım!</p>
-    <input type="text" id="username" placeholder="Adını yaz (məs: Elnur)">
-    <button class="btn" style="width: 275px;" onclick="login()">Marafona Başla</button>
+    <h2>🌙 Ramazan Marafonu</h2>
+    <input type="text" id="username" placeholder="Adını daxil et">
+    <button class="btn" style="width: 275px;" onclick="login()">Daxil Ol</button>
 </div>
 
-<header style="text-align: center; padding: 20px;">
-    <h1>🌙 Ramazan Marafonu</h1>
-    <div style="color: var(--gold);">Xalın: <span id="user-points" style="font-weight: bold; font-size: 1.5rem;">0</span></div>
+<header style="text-align: center; padding: 15px;">
+    <h1>Ramazan 2026</h1>
+    <div class="timer-box" id="iftar-timer">İftar yüklənir...</div>
+    <div style="color: var(--gold);">Xalın: <span id="user-points">0</span></div>
 </header>
+
+<div class="stat-card">
+    <span id="zikr-title">Sübhənallah</span>
+    <div id="tasbeh-count" style="font-size: 2rem; font-weight: bold; color: var(--gold);">0</div>
+    <button class="tasbeh-btn" onclick="hitTasbeh()">+</button>
+    <div style="font-size: 0.7rem; opacity: 0.6;">Təsbeh üçün vurun</div>
+</div>
 
 <div class="grid-container" id="map"></div>
 
 <div class="stat-card">
-    <h3>🏆 Liderlər Cədvəli (Top 10)</h3>
-    <div id="leaderboard">Yüklənir...</div>
+    <h3>🙏 Dua Divarı</h3>
+    <textarea id="dua-input" placeholder="Duanı bura yaz..." style="width: 90%; height: 60px;"></textarea>
+    <button class="btn" onclick="sendDua()" style="margin-top: 5px;">Dua Paylaş</button>
+    <div id="dua-list" style="margin-top: 15px; max-height: 200px; overflow-y: auto;"></div>
+</div>
+
+<div class="stat-card">
+    <h3>🏆 Top 10 Lider</h3>
+    <div id="leaderboard"></div>
 </div>
 
 <div class="overlay" id="overlay" onclick="closeModal()"></div>
 <div id="task-modal">
     <h3 id="modal-day-title" style="color: var(--dark-blue);"></h3>
-    <p id="modal-task-text" style="font-size: 1.1rem; margin: 20px 0;"></p>
+    <p id="modal-task-text" style="margin: 20px 0;"></p>
     <div id="task-action-area"></div>
-    <button onclick="closeModal()" style="border:none; background:none; color:#999; margin-top:15px; cursor:pointer;">Bağla</button>
+    <button onclick="closeModal()" style="border:none; background:none; color:#999; margin-top:15px; cursor:pointer; font-weight: bold;">Daha sonra edəcəm</button>
 </div>
 
 <script>
-    // 1. Sənin Firebase məlumatların
     const firebaseConfig = {
         apiKey: "AIzaSyBOFjAAqdoNyQqRY09pjIB83W0sfhrGBJA",
         authDomain: "amazanmarafonu.firebaseapp.com",
@@ -76,46 +95,60 @@
     let currentUser = localStorage.getItem('ramazanUser');
     let points = 0;
     let completedDays = [];
-    
-    // 2. Tarix Hesablaması (Ramazan: 18 Fevral 2026 başlayıb)
     const ramadanStart = new Date("2026-02-18T00:00:00");
-    const today = new Date();
-    const diffTime = today - ramadanStart;
-    const currentRamadanDay = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
-    const tasks = [
-        "Bu gün bir nəfərə salam ver və gülümsə.",
-        "İftarda suyu oturaraq və 3 qurtuma iç.",
-        "Bu gün bir heyvana su və ya yem ver.",
-        "Ailənə 'səni çox istəyirəm' de.",
-        "Ehtiyacı olana gizlicə sədəqə ver.",
-        "Yeməkdə duzu azaldaraq sağlığına diqqət et.",
-        "Qonşuna iftardan pay göndər.",
-        "Bu gün dilini pis sözlərdən qoru.",
-        "15 dəqiqə mənəvi bir kitab oxu.",
-        "Köhnə dostuna zəng et.",
-        "Bu gün israfdan qaç!",
-        "Bir uşağı sevindir.",
-        "Valideynlərinin xeyir-duasını al.",
-        "Yoldakı zibili götürüb qutuya at.",
-        "Hər kəsə qarşı səbirli ol.",
-        "İftar süfrəsini sən yığ.",
-        "Bildiyin duanı kiməsə öyrət.",
-        "Gecə yatmazdan əvvəl tövbə et.",
-        "Sosial mediada vaxtını azald.",
-        "Susuz bir ağacı sula.",
-        "Bütün dünya üçün dua et.",
-        "Qəzəblənəndə dəstəmaz al.",
-        "Başqasının uğuruna sevin.",
-        "Yeməkdən sonra süfrə duası et.",
-        "Heç kimi tənqid etmə.",
-        "Təhəccüd namazına qalxmağa çalış.",
-        "Bu gün yeni bir şey öyrən.",
-        "Qonağa və ya kuryerə xoş söz de.",
-        "Verdiyin sözü yerinə yetir.",
-        "Bu gözəl vərdişləri davam etdir!"
-    ];
+    // 1. İftar Geri Sayım (Bakı vaxtı ilə təxmini 18:30 götürülür)
+    function updateTimer() {
+        const now = new Date();
+        const iftar = new Date();
+        iftar.setHours(18, 30, 0); // Bu saatı QMİ cədvəlinə görə hər gün yeniləyə bilərsən
 
+        let diff = iftar - now;
+        if (diff < 0) {
+            document.getElementById('iftar-timer').innerText = "Allah qəbul etsin!";
+            return;
+        }
+
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        document.getElementById('iftar-timer').innerText = `İftara: ${h}s ${m}d ${s}san`;
+    }
+    setInterval(updateTimer, 1000);
+
+    // 2. Təsbeh Funksiyası
+    let localZikr = parseInt(localStorage.getItem('zikrCount')) || 0;
+    document.getElementById('tasbeh-count').innerText = localZikr;
+    
+    function hitTasbeh() {
+        localZikr++;
+        document.getElementById('tasbeh-count').innerText = localZikr;
+        localStorage.setItem('zikrCount', localZikr);
+        if (navigator.vibrate) navigator.vibrate(40);
+        
+        // Hər 33-də zikri dəyişək
+        const zikrs = ["Sübhənallah", "Əlhəmdülillah", "Allahuekbər"];
+        document.getElementById('zikr-title').innerText = zikrs[Math.floor((localZikr % 99) / 33)] || "Sübhənallah";
+    }
+
+    // 3. Dua Divarı
+    function sendDua() {
+        const msg = document.getElementById('dua-input').value.trim();
+        if(!msg) return;
+        db.ref('prayers').push({ user: currentUser, text: msg, time: Date.now() });
+        document.getElementById('dua-input').value = '';
+    }
+
+    db.ref('prayers').limitToLast(10).on('value', snap => {
+        let html = '';
+        snap.forEach(child => {
+            const d = child.val();
+            html = `<div class="dua-item"><b>${d.user}:</b> ${d.text}</div>` + html;
+        });
+        document.getElementById('dua-list').innerHTML = html;
+    });
+
+    // 4. Əsas Sistem
     if (currentUser) {
         document.getElementById('login-overlay').style.display = 'none';
         loadUserData();
@@ -123,7 +156,7 @@
 
     function login() {
         const name = document.getElementById('username').value.trim();
-        if (name.length < 2) return alert("Ad çox qısadır!");
+        if (name.length < 2) return alert("Ad daxil edin!");
         currentUser = name;
         localStorage.setItem('ramazanUser', name);
         document.getElementById('login-overlay').style.display = 'none';
@@ -144,33 +177,22 @@
     function renderMap() {
         const mapContainer = document.getElementById('map');
         mapContainer.innerHTML = '';
+        const currentDay = Math.floor((new Date() - ramadanStart) / 86400000) + 1;
+
         for (let i = 1; i <= 30; i++) {
             const dayBox = document.createElement('div');
-            dayBox.classList.add('day-box');
+            dayBox.className = `day-box ${i > currentDay ? 'locked' : ''} ${completedDays.includes(i) ? 'completed' : ''}`;
             dayBox.innerText = i;
-
-            if (i > currentRamadanDay) {
-                dayBox.classList.add('locked');
-                dayBox.onclick = () => alert(`Səbirli ol yoldaşım! ${i}-cu günün tapşırığı hələ açılmayıb.`);
-            } else {
-                if (completedDays.includes(i)) dayBox.classList.add('completed');
-                dayBox.onclick = () => openTask(i);
-            }
+            dayBox.onclick = i <= currentDay ? () => openTask(i) : () => alert("Vaxtı gözləyin...");
             mapContainer.appendChild(dayBox);
         }
     }
 
     function openTask(day) {
         document.getElementById('modal-day-title').innerText = "Gün " + day;
-        document.getElementById('modal-task-text').innerText = tasks[day-1];
-        const actionArea = document.getElementById('task-action-area');
-        
-        if (completedDays.includes(day)) {
-            actionArea.innerHTML = "<p style='color: #27ae60; font-weight:bold;'>Bu əməli artıq etmisən! 🌟</p>";
-        } else {
-            actionArea.innerHTML = `<button class="btn animate__animated animate__pulse animate__infinite" onclick="completeTask(${day})">Əməli etdim (+10 Bal)</button>`;
-        }
-        
+        document.getElementById('modal-task-text').innerText = "Bu gün bir xeyir əməl et və xal qazan!";
+        document.getElementById('task-action-area').innerHTML = completedDays.includes(day) ? 
+            "✅ Tamamlanıb" : `<button class="btn" onclick="completeTask(${day})">Görevi bitirdim (+10)</button>`;
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('task-modal').style.display = 'block';
     }
@@ -179,28 +201,19 @@
         if (!completedDays.includes(day)) {
             completedDays.push(day);
             points += 10;
-            db.ref('users/' + currentUser).update({
-                points: points,
-                completed: completedDays
-            });
+            db.ref('users/' + currentUser).update({ points: points, completed: completedDays });
         }
         closeModal();
     }
 
     function loadLeaderboard() {
-        db.ref('users').orderByChild('points').limitToLast(10).on('value', (snapshot) => {
+        db.ref('users').orderByChild('points').limitToLast(10).on('value', snap => {
             let list = [];
-            snapshot.forEach(child => {
-                list.push({name: child.key, points: child.val().points});
-            });
-            list.reverse();
-            let html = list.map((u, i) => `
-                <div class="leaderboard-item">
-                    <span>${i+1}. ${u.name}</span>
-                    <span style="color:var(--gold)">${u.points} xal</span>
-                </div>
-            `).join('');
-            document.getElementById('leaderboard').innerHTML = html || "Hələ ki heç kim yoxdur...";
+            snap.forEach(c => list.push({n: c.key, p: c.val().points}));
+            document.getElementById('leaderboard').innerHTML = list.reverse().map((u, i) => 
+                `<div style="display:flex; justify-content:space-between; font-size:0.9rem; padding:3px;">
+                    <span>${i+1}. ${u.n}</span> <span>${u.p} xal</span>
+                </div>`).join('');
         });
     }
 
