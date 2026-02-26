@@ -3,265 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ramazan Marafonu | 30 Günlük Macəra</title>
-    
+    <title>Ramazan Marafonu | 2026</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <style>
-        :root {
-            --gold: #d4af37;
-            --dark-blue: #0c1445;
-            --light-blue: #1d2b64;
-            --white: #f8f9fa;
-        }
-
-        body {
-            background: linear-gradient(135deg, var(--dark-blue), var(--light-blue));
-            color: var(--white);
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden; /* Sağa sürüşmənin qarşısını alır */
-        }
-
-        /* Xoş gəldin bildirişi */
-        #welcome-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 2000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        header {
-            text-align: center;
-            padding: 20px;
-        }
-
-        h1 { font-size: 1.8rem; color: var(--gold); margin-top: 10px; }
-
-        .stats-container {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            width: 90%;
-            justify-content: center;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px 15px;
-            border-radius: 12px;
-            border: 1px solid var(--gold);
-            flex: 1;
-            max-width: 150px;
-            text-align: center;
-            backdrop-filter: blur(5px);
-        }
-
-        .stat-card span {
-            display: block;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--gold);
-        }
-
-        /* Mobilə uyğun Grid sistemi */
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-            gap: 10px;
-            width: 95%;
-            max-width: 500px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 20px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            margin-bottom: 30px;
-        }
-
-        .day-box {
-            aspect-ratio: 1 / 1; /* Kvadrat qalması üçün */
-            background: var(--dark-blue);
-            border: 1px solid var(--gold);
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-
-        .day-box.completed {
-            background: var(--gold);
-            color: var(--dark-blue);
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-        }
-
-        /* Tapşırıq Modal */
-        #task-modal {
-            display: none;
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--white);
-            color: #333;
-            padding: 25px;
-            border-radius: 20px;
-            z-index: 1000;
-            width: 85%;
-            max-width: 350px;
-            text-align: center;
-        }
-
-        .btn-complete {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            margin-top: 15px;
-        }
-
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 999;
-        }
+        :root { --gold: #d4af37; --dark-blue: #0c1445; --white: #f8f9fa; }
+        body { background: linear-gradient(135deg, var(--dark-blue), #1d2b64); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-bottom: 50px; }
+        
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark-blue); z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        input { padding: 12px; border-radius: 10px; border: 1px solid var(--gold); background: rgba(255,255,255,0.1); color: white; margin-bottom: 10px; width: 250px; text-align: center; }
+        
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(65px, 1fr)); gap: 10px; width: 95%; max-width: 500px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 20px; }
+        
+        .day-box { aspect-ratio: 1/1; background: var(--dark-blue); border: 1px solid var(--gold); border-radius: 10px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        .day-box.locked { opacity: 0.3; cursor: not-allowed; background: #111; border-color: #444; }
+        .day-box.completed { background: var(--gold); color: var(--dark-blue); box-shadow: 0 0 15px var(--gold); }
+        
+        .stat-card { background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 15px; border: 1px solid var(--gold); text-align: center; backdrop-filter: blur(5px); margin: 10px; width: 85%; max-width: 450px; }
+        
+        #task-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 25px; border-radius: 20px; z-index: 1000; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; }
+        .btn { background: #27ae60; color: white; border: none; padding: 12px; border-radius: 25px; width: 100%; cursor: pointer; font-weight: bold; font-size: 1rem; }
+        .leaderboard-item { display: flex; justify-content: space-between; padding: 5px 10px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
     </style>
 </head>
 <body>
 
-<div id="welcome-overlay" onclick="closeWelcome()">
-    <div class="animate__animated animate__zoomIn">
-        <h2 style="color: var(--gold);">🌙 Salam Aleykum</h2>
-        <p style="font-size: 1.2rem;">Xoş gəldin, müsəlman yoldaşım!</p>
-        <p style="font-size: 0.9rem; opacity: 0.7;">(Daxil olmaq üçün ekrana toxun)</p>
-    </div>
+<div id="login-overlay">
+    <h2 class="animate__animated animate__fadeIn">🌙 Ramazan Marafonu</h2>
+    <p>Xoş gəldin, müsəlman yoldaşım!</p>
+    <input type="text" id="username" placeholder="Adını yaz (məs: Elnur)">
+    <button class="btn" style="width: 275px;" onclick="login()">Marafona Başla</button>
 </div>
 
-<header class="animate__animated animate__fadeInDown">
+<header style="text-align: center; padding: 20px;">
     <h1>🌙 Ramazan Marafonu</h1>
-    <p style="font-size: 0.8rem; opacity: 0.8;">30 Gün, 30 Xeyir Əməl</p>
+    <div style="color: var(--gold);">Xalın: <span id="user-points" style="font-weight: bold; font-size: 1.5rem;">0</span></div>
 </header>
-
-<div class="stats-container">
-    <div class="stat-card">Xalın <span id="user-points">0</span></div>
-    <div class="stat-card">Tamamlanan <span id="completed-count">0</span></div>
-</div>
 
 <div class="grid-container" id="map"></div>
 
+<div class="stat-card">
+    <h3>🏆 Liderlər Cədvəli (Top 10)</h3>
+    <div id="leaderboard">Yüklənir...</div>
+</div>
+
 <div class="overlay" id="overlay" onclick="closeModal()"></div>
 <div id="task-modal">
-    <h3 id="modal-day-title" style="color: var(--dark-blue);">Gün 1</h3>
-    <hr border="0" height="1px" background="#eee">
-    <p id="modal-task-text" style="line-height: 1.5; font-weight: 500;"></p>
-    <button class="btn-complete" onclick="completeTask()">Əməli etdim (+10 Bal)</button>
+    <h3 id="modal-day-title" style="color: var(--dark-blue);"></h3>
+    <p id="modal-task-text" style="font-size: 1.1rem; margin: 20px 0;"></p>
+    <div id="task-action-area"></div>
     <button onclick="closeModal()" style="border:none; background:none; color:#999; margin-top:15px; cursor:pointer;">Bağla</button>
 </div>
 
 <script>
+    // 1. Sənin Firebase məlumatların
+    const firebaseConfig = {
+        apiKey: "AIzaSyBOFjAAqdoNyQqRY09pjIB83W0sfhrGBJA",
+        authDomain: "amazanmarafonu.firebaseapp.com",
+        databaseURL: "https://amazanmarafonu-default-rtdb.firebaseio.com",
+        projectId: "amazanmarafonu",
+        storageBucket: "amazanmarafonu.firebasestorage.app",
+        messagingSenderId: "619549950176",
+        appId: "1:619549950176:web:3075c336e0167aaa2f9085"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let currentUser = localStorage.getItem('ramazanUser');
+    let points = 0;
+    let completedDays = [];
+    
+    // 2. Tarix Hesablaması (Ramazan: 18 Fevral 2026 başlayıb)
+    const ramadanStart = new Date("2026-02-18T00:00:00");
+    const today = new Date();
+    const diffTime = today - ramadanStart;
+    const currentRamadanDay = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
     const tasks = [
-        "Bu gün bir nəfərə salam ver və gülümsə. Təbəssüm sədəqədir.",
-        "İftarda suyu oturaraq və 3 qurtuma içməyə çalış.",
+        "Bu gün bir nəfərə salam ver və gülümsə.",
+        "İftarda suyu oturaraq və 3 qurtuma iç.",
         "Bu gün bir heyvana su və ya yem ver.",
-        "Ailə üzvlərindən birinə 'səni çox istəyirəm' de və ya qucaqla.",
-        "Bu gün bir ehtiyacı olana gizlicə sədəqə ver.",
-        "Yemək yeyərkən duzdan az istifadə et, sağlığına diqqət et.",
-        "Bu gün bir qonşuna iftardan pay göndər.",
-        "Dilini pis sözlərdən və qeybətdən qoru.",
-        "Bu gün ən azı 15 dəqiqə mənəvi kitab oxu.",
-        "Köhnə bir dostuna zəng et və hal-əhval tut.",
-        "Bu gün israfdan qaç: yeməyini və suyunu qənaətlə işlət.",
-        "Bir uşağı sevindir (kiçik bir konfet belə kifayətdir).",
-        "Bu gün valideynlərinin (və ya böyüklərin) xeyir-duasını al.",
-        "Yol kənarındakı bir zibili götürüb qutuya at.",
-        "Bu gün hər kəsə qarşı daha səbirli olacağına söz ver.",
-        "İftar süfrəsinin qurulmasında ən böyük köməyi sən et.",
-        "Bu gün bildiyin bir duanı başqasına da öyrət.",
-        "Yatmazdan əvvəl gün ərzində etdiyin səhvlər üçün tövbə et.",
-        "Bu gün sosial mediada keçirdiyin vaxtı yarıya endir.",
-        "Susuz qalan bir ağacı və ya gülü sula.",
-        "Bu gün özün üçün yox, bütün dünya məzlumları üçün dua et.",
-        "Qəzəblənəndə dərhal dəstəmaz al və sakitləş.",
-        "Bu gün bir nəfərin uğuruna ürəkdən sevin və onu təbrik et.",
-        "Yeməkdən sonra süfrə duası etməyi unutma.",
-        "Bu gün heç kimi tənqid etmə, ancaq müsbət tərəfləri gör.",
-        "Gecə namazına (təhəccüd) qalxmağa çalış.",
-        "Bu gün bir elm öyrən və onu kiməsə danış.",
-        "Evinə gələn qonağa (və ya kuryerə) xoş söz de.",
-        "Bu gün verdiyin sözlərin hamısını yerinə yetir.",
-        "Ramazan bitir, bu ay qazandığın gözəl vərdişi davam etdirəcəyinə söz ver."
+        "Ailənə 'səni çox istəyirəm' de.",
+        "Ehtiyacı olana gizlicə sədəqə ver.",
+        "Yeməkdə duzu azaldaraq sağlığına diqqət et.",
+        "Qonşuna iftardan pay göndər.",
+        "Bu gün dilini pis sözlərdən qoru.",
+        "15 dəqiqə mənəvi bir kitab oxu.",
+        "Köhnə dostuna zəng et.",
+        "Bu gün israfdan qaç!",
+        "Bir uşağı sevindir.",
+        "Valideynlərinin xeyir-duasını al.",
+        "Yoldakı zibili götürüb qutuya at.",
+        "Hər kəsə qarşı səbirli ol.",
+        "İftar süfrəsini sən yığ.",
+        "Bildiyin duanı kiməsə öyrət.",
+        "Gecə yatmazdan əvvəl tövbə et.",
+        "Sosial mediada vaxtını azald.",
+        "Susuz bir ağacı sula.",
+        "Bütün dünya üçün dua et.",
+        "Qəzəblənəndə dəstəmaz al.",
+        "Başqasının uğuruna sevin.",
+        "Yeməkdən sonra süfrə duası et.",
+        "Heç kimi tənqid etmə.",
+        "Təhəccüd namazına qalxmağa çalış.",
+        "Bu gün yeni bir şey öyrən.",
+        "Qonağa və ya kuryerə xoş söz de.",
+        "Verdiyin sözü yerinə yetir.",
+        "Bu gözəl vərdişləri davam etdir!"
     ];
 
-    let points = parseInt(localStorage.getItem('marafonPoints')) || 0;
-    let completedDays = JSON.parse(localStorage.getItem('completedDays')) || [];
-    let selectedDay = null;
-
-    function updateStats() {
-        document.getElementById('user-points').innerText = points;
-        document.getElementById('completed-count').innerText = completedDays.length;
+    if (currentUser) {
+        document.getElementById('login-overlay').style.display = 'none';
+        loadUserData();
     }
 
-    const mapContainer = document.getElementById('map');
-    for (let i = 1; i <= 30; i++) {
-        const dayBox = document.createElement('div');
-        dayBox.classList.add('day-box');
-        dayBox.innerText = i;
-        if (completedDays.includes(i)) dayBox.classList.add('completed');
-        dayBox.onclick = () => openTask(i);
-        mapContainer.appendChild(dayBox);
+    function login() {
+        const name = document.getElementById('username').value.trim();
+        if (name.length < 2) return alert("Ad çox qısadır!");
+        currentUser = name;
+        localStorage.setItem('ramazanUser', name);
+        document.getElementById('login-overlay').style.display = 'none';
+        loadUserData();
+    }
+
+    function loadUserData() {
+        db.ref('users/' + currentUser).on('value', (snapshot) => {
+            const data = snapshot.val() || { points: 0, completed: [] };
+            points = data.points;
+            completedDays = data.completed || [];
+            document.getElementById('user-points').innerText = points;
+            renderMap();
+        });
+        loadLeaderboard();
+    }
+
+    function renderMap() {
+        const mapContainer = document.getElementById('map');
+        mapContainer.innerHTML = '';
+        for (let i = 1; i <= 30; i++) {
+            const dayBox = document.createElement('div');
+            dayBox.classList.add('day-box');
+            dayBox.innerText = i;
+
+            if (i > currentRamadanDay) {
+                dayBox.classList.add('locked');
+                dayBox.onclick = () => alert(`Səbirli ol yoldaşım! ${i}-cu günün tapşırığı hələ açılmayıb.`);
+            } else {
+                if (completedDays.includes(i)) dayBox.classList.add('completed');
+                dayBox.onclick = () => openTask(i);
+            }
+            mapContainer.appendChild(dayBox);
+        }
     }
 
     function openTask(day) {
-        selectedDay = day;
         document.getElementById('modal-day-title').innerText = "Gün " + day;
         document.getElementById('modal-task-text').innerText = tasks[day-1];
+        const actionArea = document.getElementById('task-action-area');
+        
+        if (completedDays.includes(day)) {
+            actionArea.innerHTML = "<p style='color: #27ae60; font-weight:bold;'>Bu əməli artıq etmisən! 🌟</p>";
+        } else {
+            actionArea.innerHTML = `<button class="btn animate__animated animate__pulse animate__infinite" onclick="completeTask(${day})">Əməli etdim (+10 Bal)</button>`;
+        }
+        
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('task-modal').style.display = 'block';
-        document.getElementById('task-modal').className = 'animate__animated animate__bounceIn';
+    }
+
+    function completeTask(day) {
+        if (!completedDays.includes(day)) {
+            completedDays.push(day);
+            points += 10;
+            db.ref('users/' + currentUser).update({
+                points: points,
+                completed: completedDays
+            });
+        }
+        closeModal();
+    }
+
+    function loadLeaderboard() {
+        db.ref('users').orderByChild('points').limitToLast(10).on('value', (snapshot) => {
+            let list = [];
+            snapshot.forEach(child => {
+                list.push({name: child.key, points: child.val().points});
+            });
+            list.reverse();
+            let html = list.map((u, i) => `
+                <div class="leaderboard-item">
+                    <span>${i+1}. ${u.name}</span>
+                    <span style="color:var(--gold)">${u.points} xal</span>
+                </div>
+            `).join('');
+            document.getElementById('leaderboard').innerHTML = html || "Hələ ki heç kim yoxdur...";
+        });
     }
 
     function closeModal() {
         document.getElementById('overlay').style.display = 'none';
         document.getElementById('task-modal').style.display = 'none';
     }
-
-    function completeTask() {
-        if (!completedDays.includes(selectedDay)) {
-            points += 10;
-            completedDays.push(selectedDay);
-            localStorage.setItem('marafonPoints', points);
-            localStorage.setItem('completedDays', JSON.stringify(completedDays));
-            updateStats();
-            // Günün rəngini dəyiş
-            const boxes = document.querySelectorAll('.day-box');
-            boxes[selectedDay-1].classList.add('completed');
-        }
-        closeModal();
-    }
-
-    function closeWelcome() {
-        const welcome = document.getElementById('welcome-overlay');
-        welcome.classList.add('animate__animated', 'animate__fadeOut');
-        setTimeout(() => welcome.style.display = 'none', 500);
-    }
-
-    updateStats();
 </script>
 
 </body>
