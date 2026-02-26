@@ -33,7 +33,10 @@
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; }
         .btn { background: #27ae60; color: white; border: none; padding: 12px; border-radius: 25px; width: 100%; cursor: pointer; font-weight: bold; }
         
-        .dua-item { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; margin-bottom: 5px; text-align: left; border-left: 3px solid var(--gold); font-size: 0.9rem; }
+        /* Dua və Amin Stili */
+        .dua-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; margin-bottom: 8px; text-align: left; border-left: 4px solid var(--gold); }
+        .amin-section { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border-top: 1px solid rgba(212,175,55,0.1); padding-top: 5px; }
+        .amin-btn { background: #d4af37; color: #0c1445; border: none; padding: 3px 12px; border-radius: 15px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -47,14 +50,13 @@
 <header style="text-align: center; padding: 15px;">
     <h1>Ramazan 2026</h1>
     <div class="timer-box" id="iftar-timer">İftar yüklənir...</div>
-    <div style="color: var(--gold);">Xalın: <span id="user-points">0</span></div>
+    <div style="color: var(--gold); font-size: 1.2rem;">Xalın: <span id="user-points" style="font-weight: bold;">0</span></div>
 </header>
 
 <div class="stat-card">
     <span id="zikr-title">Sübhənallah</span>
     <div id="tasbeh-count" style="font-size: 2rem; font-weight: bold; color: var(--gold);">0</div>
     <button class="tasbeh-btn" onclick="hitTasbeh()">+</button>
-    <div style="font-size: 0.7rem; opacity: 0.6;">Təsbeh üçün vurun</div>
 </div>
 
 <div class="grid-container" id="map"></div>
@@ -63,7 +65,7 @@
     <h3>🙏 Dua Divarı</h3>
     <textarea id="dua-input" placeholder="Duanı bura yaz..." style="width: 90%; height: 60px;"></textarea>
     <button class="btn" onclick="sendDua()" style="margin-top: 5px;">Dua Paylaş</button>
-    <div id="dua-list" style="margin-top: 15px; max-height: 200px; overflow-y: auto;"></div>
+    <div id="dua-list" style="margin-top: 15px; max-height: 250px; overflow-y: auto;"></div>
 </div>
 
 <div class="stat-card">
@@ -97,18 +99,15 @@
     let completedDays = [];
     const ramadanStart = new Date("2026-02-18T00:00:00");
 
-    // 1. İftar Geri Sayım (Bakı vaxtı ilə təxmini 18:30 götürülür)
     function updateTimer() {
         const now = new Date();
         const iftar = new Date();
-        iftar.setHours(18, 30, 0); // Bu saatı QMİ cədvəlinə görə hər gün yeniləyə bilərsən
-
+        iftar.setHours(18, 30, 0);
         let diff = iftar - now;
         if (diff < 0) {
             document.getElementById('iftar-timer').innerText = "Allah qəbul etsin!";
             return;
         }
-
         const h = Math.floor(diff / 3600000);
         const m = Math.floor((diff % 3600000) / 60000);
         const s = Math.floor((diff % 60000) / 1000);
@@ -116,39 +115,52 @@
     }
     setInterval(updateTimer, 1000);
 
-    // 2. Təsbeh Funksiyası
     let localZikr = parseInt(localStorage.getItem('zikrCount')) || 0;
     document.getElementById('tasbeh-count').innerText = localZikr;
-    
     function hitTasbeh() {
         localZikr++;
         document.getElementById('tasbeh-count').innerText = localZikr;
         localStorage.setItem('zikrCount', localZikr);
         if (navigator.vibrate) navigator.vibrate(40);
-        
-        // Hər 33-də zikri dəyişək
         const zikrs = ["Sübhənallah", "Əlhəmdülillah", "Allahuekbər"];
         document.getElementById('zikr-title').innerText = zikrs[Math.floor((localZikr % 99) / 33)] || "Sübhənallah";
     }
 
-    // 3. Dua Divarı
+    // DUA VƏ AMİN FUNKSİYASI
     function sendDua() {
         const msg = document.getElementById('dua-input').value.trim();
         if(!msg) return;
-        db.ref('prayers').push({ user: currentUser, text: msg, time: Date.now() });
+        db.ref('prayers').push({ 
+            user: currentUser, 
+            text: msg, 
+            time: Date.now(),
+            amins: 0 
+        });
         document.getElementById('dua-input').value = '';
     }
 
-    db.ref('prayers').limitToLast(10).on('value', snap => {
+    function addAmin(duaId) {
+        const aminRef = db.ref('prayers/' + duaId + '/amins');
+        aminRef.transaction(currentAmins => (currentAmins || 0) + 1);
+    }
+
+    db.ref('prayers').limitToLast(15).on('value', snap => {
         let html = '';
         snap.forEach(child => {
             const d = child.val();
-            html = `<div class="dua-item"><b>${d.user}:</b> ${d.text}</div>` + html;
+            const id = child.key;
+            html = `
+                <div class="dua-item">
+                    <b>${d.user}:</b> ${d.text}
+                    <div class="amin-section">
+                        <span style="font-size:0.8rem; color:var(--gold)">✨ ${d.amins || 0} Amin</span>
+                        <button class="amin-btn" onclick="addAmin('${id}')">Amin 🙏</button>
+                    </div>
+                </div>` + html;
         });
         document.getElementById('dua-list').innerHTML = html;
     });
 
-    // 4. Əsas Sistem
     if (currentUser) {
         document.getElementById('login-overlay').style.display = 'none';
         loadUserData();
@@ -163,12 +175,17 @@
         loadUserData();
     }
 
+    // XALLARIN GÖRÜNMƏSİNİ TƏMİN EDƏN ƏSAS FUNKSİYA
     function loadUserData() {
         db.ref('users/' + currentUser).on('value', (snapshot) => {
             const data = snapshot.val() || { points: 0, completed: [] };
             points = data.points;
             completedDays = data.completed || [];
-            document.getElementById('user-points').innerText = points;
+            
+            // UI Yenilənməsi
+            const pointsElement = document.getElementById('user-points');
+            if(pointsElement) pointsElement.innerText = points;
+            
             renderMap();
         });
         loadLeaderboard();
@@ -176,6 +193,7 @@
 
     function renderMap() {
         const mapContainer = document.getElementById('map');
+        if(!mapContainer) return;
         mapContainer.innerHTML = '';
         const currentDay = Math.floor((new Date() - ramadanStart) / 86400000) + 1;
 
@@ -183,7 +201,7 @@
             const dayBox = document.createElement('div');
             dayBox.className = `day-box ${i > currentDay ? 'locked' : ''} ${completedDays.includes(i) ? 'completed' : ''}`;
             dayBox.innerText = i;
-            dayBox.onclick = i <= currentDay ? () => openTask(i) : () => alert("Vaxtı gözləyin...");
+            dayBox.onclick = i <= currentDay ? () => openTask(i) : () => alert("Sabahı gözləyin...");
             mapContainer.appendChild(dayBox);
         }
     }
@@ -211,7 +229,7 @@
             let list = [];
             snap.forEach(c => list.push({n: c.key, p: c.val().points}));
             document.getElementById('leaderboard').innerHTML = list.reverse().map((u, i) => 
-                `<div style="display:flex; justify-content:space-between; font-size:0.9rem; padding:3px;">
+                `<div style="display:flex; justify-content:space-between; font-size:0.9rem; padding:3px; border-bottom:1px solid rgba(255,255,255,0.05)">
                     <span>${i+1}. ${u.n}</span> <span>${u.p} xal</span>
                 </div>`).join('');
         });
